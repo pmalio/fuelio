@@ -17,6 +17,12 @@
         }
       }
     },
+    "options": {
+      "source": {
+        "local": "Local CSV file",
+        "google_drive": "Google Drive (synced file / SMB)"
+      }
+    },
     "error": {
       "cannot_read_file": "The file could not be read or is not a valid Fuelio CSV export."
     }
