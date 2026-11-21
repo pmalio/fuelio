@@ -7,6 +7,12 @@
         "data": {
           "source": "Źródło pliku CSV",
           "scan_interval": "Częstotliwość odświeżania (minuty)"
+        },
+        "options": {
+          "source": {
+            "local": "Lokalny plik CSV",
+            "google_drive": "Google Drive (zsynchronizowany plik / SMB)"
+          }
         }
       },
       "file": {
@@ -15,12 +21,6 @@
         "data": {
           "file_path": "Ścieżka do pliku CSV"
         }
-      }
-    },
-    "options": {
-      "source": {
-        "local": "Lokalny plik CSV",
-        "google_drive": "Google Drive (zsynchronizowany plik / SMB)"
       }
     },
     "error": {
