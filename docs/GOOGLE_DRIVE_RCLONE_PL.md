@@ -28,7 +28,7 @@ Integracja Fuelio
 
 Przykładowa konfiguracja z tego poradnika:
 - Proxmox VE z kontenerem LXC Debian 12.
-- Adres kontenera synchronizującego: `192.168.8.3` (u Ciebie może być inny).
+- Adres kontenera synchronizującego: `192.168.1.10` (u Ciebie może być inny).
 - Zdalny katalog Google Drive: `Android/Fuelio/sync`.
 - Nazwa archiwum: `vehicle-1-sync.csv.zip`.
 - Katalog lokalny na LXC: `/srv/fuelio`.
@@ -67,7 +67,7 @@ Utwórz kontener Debian 12 (amd64). Przykładowe zasoby wystarczające dla samej
 - interfejs sieciowy podłączony do mostu LAN,
 - stały adres IP lub rezerwacja DHCP.
 
-W dalszych poleceniach zakładamy, że kontener ma adres `192.168.8.3`. Zaloguj się do kontenera jako `root`.
+W dalszych poleceniach zakładamy, że kontener ma adres `192.168.1.10`. Zaloguj się do kontenera jako `root`.
 
 Zaktualizuj system i zainstaluj potrzebne narzędzia:
 
@@ -295,7 +295,7 @@ Na końcu pliku dodaj:
    read only = yes
    guest ok = no
    valid users = fuelio
-   hosts allow = 192.168.8.0/24
+   hosts allow = 192.168.1.0/24
 ```
 
 Dostosuj podsieć w `hosts allow` do własnej sieci LAN. Ograniczenie dostępu do sieci lokalnej jest zalecane.
@@ -320,7 +320,7 @@ W interfejsie Home Assistant:
 3. Wprowadź:
    - **Nazwa:** `Fuelio`
    - **Typ:** Samba / Windows (CIFS)
-   - **Serwer:** adres IP kontenera LXC, np. `192.168.8.3`
+   - **Serwer:** adres IP kontenera LXC, np. `192.168.1.10`
    - **Udział:** `fuelio`
    - **Użytkownik:** `fuelio`
    - **Hasło:** hasło ustawione przez `smbpasswd`
