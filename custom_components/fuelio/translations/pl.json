@@ -17,6 +17,12 @@
         }
       }
     },
+    "options": {
+      "source": {
+        "local": "Lokalny plik CSV",
+        "google_drive": "Google Drive (zsynchronizowany plik / SMB)"
+      }
+    },
     "error": {
       "cannot_read_file": "Nie można odczytać pliku lub nie jest to poprawny eksport CSV Fuelio."
     }
