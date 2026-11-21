@@ -31,10 +31,7 @@ class FuelioConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_file()
 
         schema = vol.Schema({
-            vol.Required(CONF_SOURCE, default=SOURCE_LOCAL): vol.In({
-                SOURCE_LOCAL: "Local CSV file",
-                SOURCE_GOOGLE_DRIVE: "Google Drive (synced file / SMB)",
-            }),
+            vol.Required(CONF_SOURCE, default=SOURCE_LOCAL): vol.In([SOURCE_LOCAL, SOURCE_GOOGLE_DRIVE]),
             vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
                 vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
             ),
