@@ -1,6 +1,6 @@
 # Synchronizacja Fuelio z Google Drive przez rclone i SMB
 
-Ten poradnik opisuje wariant, w którym aplikacja Fuelio automatycznie wysyła archiwum ZIP do Google Drive, a osobny kontener LXC pobiera je przez `rclone`, rozpakowuje CSV i udostępnia plik Home Assistant przez SMB.
+Ten poradnik opisuje wariant, w którym aplikacja Fuelio synchronizuje eksport do Google Drive, a osobny kontener LXC pobiera go przez `rclone`, rozpakowuje CSV i udostępnia plik Home Assistant przez SMB. **Synchronizacja po stronie aplikacji Fuelio jest warunkiem koniecznym** — rclone nie uruchamia synchronizacji w telefonie i nie pobiera danych bezpośrednio z aplikacji.
 
 Integracja Fuelio **nie łączy się bezpośrednio z Google Drive**. Odczytuje gotowy plik CSV z lokalnego udziału sieciowego.
 
@@ -9,7 +9,8 @@ Integracja Fuelio **nie łączy się bezpośrednio z Google Drive**. Odczytuje g
 ```text
 Fuelio na Androidzie
        |
-       | automatyczna synchronizacja ZIP
+       | użytkownik uruchamia synchronizację w aplikacji
+       | (lub korzysta z włączonej w niej synchronizacji automatycznej)
        v
 Google Drive: Android/Fuelio/sync/vehicle-1-sync.csv.zip
        |
@@ -38,7 +39,26 @@ Dostosuj adres IP, nazwy i ścieżki do własnej sieci oraz eksportu Fuelio.
 
 ---
 
-## 1. Przygotuj kontener LXC w Proxmox
+## 1. Najpierw zsynchronizuj dane w aplikacji Fuelio
+
+Zanim skonfigurujesz lub uruchomisz rclone, skonfiguruj synchronizację Google Drive w aplikacji Fuelio na telefonie. To Fuelio tworzy i wysyła archiwum ZIP — rclone jedynie pobiera już wysłany plik.
+
+1. Otwórz Fuelio na telefonie.
+2. Wejdź w ustawienia aplikacji i odszukaj funkcję kopii zapasowej / synchronizacji z Google Drive (nazwy i położenie opcji mogą zależeć od wersji aplikacji).
+3. Połącz Fuelio z tym samym kontem Google Drive, do którego później uzyskasz dostęp przez rclone.
+4. Włącz synchronizację Google Drive, jeśli aplikacja udostępnia taką opcję.
+5. Po dodaniu tankowania lub kosztu uruchom synchronizację w Fuelio (np. poleceniem synchronizacji/kopii zapasowej w aplikacji), jeśli nie wykonuje się ona automatycznie.
+6. Otwórz Google Drive i sprawdź, czy pojawił się lub zaktualizował plik ZIP w katalogu `Android/Fuelio/sync`. W tym poradniku oczekiwana nazwa to `vehicle-1-sync.csv.zip`.
+
+**Ważne:** samo działanie timera rclone co 15 minut nie gwarantuje świeżych danych. Jeśli Fuelio nie wykona synchronizacji, w Google Drive pozostanie poprzednia wersja ZIP, a rclone będzie ją poprawnie pobierał w kółko. Po ręcznym uruchomieniu synchronizacji w Fuelio można sprawdzić datę modyfikacji pliku ZIP w Google Drive albo poleceniem:
+
+```bash
+rclone lsjson fuelio:Android/Fuelio/sync --max-depth 2
+```
+
+Dopiero gdy ZIP w Google Drive jest aktualny, przejdź do konfiguracji rclone poniżej.
+
+## 2. Przygotuj kontener LXC w Proxmox
 
 Utwórz kontener Debian 12 (amd64). Przykładowe zasoby wystarczające dla samej synchronizacji:
 - 1 rdzeń CPU,
@@ -63,7 +83,7 @@ Utwórz katalogi:
 mkdir -p /opt/fuelio-sync /srv/fuelio
 ```
 
-## 2. Skonfiguruj dostęp rclone do Google Drive
+## 3. Skonfiguruj dostęp rclone do Google Drive
 
 ### 2.1. Utwórz projekt OAuth Google
 
@@ -124,7 +144,7 @@ rclone lsjson fuelio:Android/Fuelio/sync --max-depth 2
 
 W katalogu powinno być widoczne archiwum `vehicle-1-sync.csv.zip`. Jeśli Fuelio zapisuje eksport w innym folderze lub pod inną nazwą, popraw ścieżkę w skrypcie z następnego kroku.
 
-## 3. Przygotuj skrypt pobierający i rozpakowujący CSV
+## 4. Przygotuj skrypt pobierający i rozpakowujący CSV
 
 Utwórz plik:
 
@@ -181,7 +201,7 @@ Jeśli archiwum zawiera CSV w podkatalogu, a nie w katalogu głównym ZIP, popra
 
 Skrypt najpierw pobiera i sprawdza plik tymczasowy. Dotychczasowy CSV jest podmieniany dopiero po udanym pobraniu i rozpakowaniu, dzięki czemu błąd synchronizacji nie powinien nadpisać działającego pliku pustym lub niekompletnym eksportem.
 
-## 4. Ustaw automatyczne uruchamianie co 15 minut
+## 5. Ustaw automatyczne uruchamianie co 15 minut
 
 Utwórz usługę systemd:
 
@@ -249,7 +269,7 @@ Logi ostatniego uruchomienia:
 journalctl -u fuelio-sync.service -n 50 --no-pager
 ```
 
-## 5. Udostępnij katalog przez SMB (Samba)
+## 6. Udostępnij katalog przez SMB (Samba)
 
 Utwórz użytkownika systemowego i konto Samby:
 
@@ -291,7 +311,7 @@ systemctl status smbd
 
 Konto udziału ma dostęp tylko do odczytu. Nie udostępniaj Samby bezpośrednio do Internetu.
 
-## 6. Dodaj udział sieciowy w Home Assistant
+## 7. Dodaj udział sieciowy w Home Assistant
 
 W interfejsie Home Assistant:
 
@@ -334,7 +354,7 @@ test -s /share/Fuelio/vehicle-1-sync.csv && echo "CSV jest dostępny"
 
 Jeżeli katalog nie istnieje lub jest pusty, sprawdź konfigurację udziału sieciowego w Home Assistant, adres IP, nazwę udziału, dane logowania oraz logi `smbd` w kontenerze LXC.
 
-## 7. Skonfiguruj integrację Fuelio
+## 8. Skonfiguruj integrację Fuelio
 
 Podczas dodawania integracji wybierz źródło:
 
@@ -348,7 +368,7 @@ Domyślna ścieżka:
 
 Ustaw interwał odświeżania integracji, np. 5 minut. Synchronizacja rclone działa niezależnie co 15 minut, więc integracja odczyta nowy plik przy kolejnym swoim odświeżeniu.
 
-## 8. Diagnostyka
+## 9. Diagnostyka
 
 ### Czy rclone widzi plik w Google Drive?
 
@@ -395,7 +415,7 @@ ls -lh /share/Fuelio/
 - **Brak katalogu w HA:** sprawdź montowanie SMB w ustawieniach pamięci sieciowej HA.
 - **Dane nie odświeżają się od razu:** uwzględnij osobne interwały timera rclone (15 min) i integracji (np. 5 min).
 
-## 9. Bezpieczeństwo i kopie zapasowe
+## 10. Bezpieczeństwo i kopie zapasowe
 
 - Nie umieszczaj Client Secret, tokenów OAuth, haseł Samby ani pliku `rclone.conf` w repozytorium.
 - Ogranicz dostęp do kontenera LXC i jego plików konfiguracyjnych. Plik rclone zawiera dane umożliwiające dostęp do Google Drive.
