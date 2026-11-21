@@ -21,6 +21,8 @@ Integracja czyta wyłącznie rozpakowany plik CSV widoczny w systemie plików Ho
 
 `Google Drive → rclone → rozpakowanie CSV → udział SMB → /share/Fuelio/vehicle-1-sync.csv → Fuelio`
 
+Szczegółowa instrukcja konfiguracji kontenera LXC, Google OAuth, rclone, skryptu synchronizacji, timera systemd, Samby i montowania udziału w Home Assistant znajduje się w pliku [docs/GOOGLE_DRIVE_RCLONE_PL.md](docs/GOOGLE_DRIVE_RCLONE_PL.md).
+
 Nie wpisuj danych OAuth Google do konfiguracji integracji.
 
 ## Encje
