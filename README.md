@@ -1,10 +1,11 @@
 # Fuelio – Home Assistant integration
 
-Custom Home Assistant integration for reading a local CSV export from the Fuelio Android app.
+Custom Home Assistant integration for reading Fuelio CSV exports.
 
-- Manual CSV import; no direct Google Drive API connection.
+- Choose between a local CSV file and a Google Drive-synchronized CSV file.
+- Google Drive is accessed through an external sync process (for example rclone + SMB); the integration itself does not authenticate to Google.
 - Local polling with configurable refresh interval.
 - Sensors for odometer, refuelling, fuel costs, consumption and service reminders.
 - No telemetry: the CSV is read locally by Home Assistant.
 
-See [README_PL.md](README_PL.md) for installation and configuration instructions in Polish.
+See [README_PL.md](README_PL.md) for Polish installation and configuration instructions.
