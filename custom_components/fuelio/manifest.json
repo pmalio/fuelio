@@ -6,8 +6,8 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/pmalio/fuelio",
+  "issue_tracker": "https://github.com/pmalio/fuelio/issues",
   "iot_class": "local_polling",
   "requirements": [],
-  "version": "1.0.0",
-  "issue_tracker": "https://github.com/pmalio/fuelio/issues"
+  "version": "1.0.0"
 }
