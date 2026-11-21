@@ -1,16 +1,27 @@
 # Fuelio dla Home Assistant
 
-Niestandardowa integracja odczytująca lokalny eksport CSV aplikacji Fuelio. Integracja nie łączy się bezpośrednio z Google Drive, nie modyfikuje pliku źródłowego i nie wysyła danych poza Home Assistant.
+Niestandardowa integracja odczytująca eksport CSV aplikacji Fuelio. Obsługuje dwa warianty źródła:
+- **Lokalny plik CSV** — np. w katalogu `/config/fuelio/`.
+- **Google Drive** — przez zewnętrzną synchronizację pliku do Home Assistant, np. rclone na osobnym LXC i udział SMB. Integracja nie łączy się bezpośrednio z Google Drive ani nie przechowuje tokenów Google.
 
 ## Instalacja ręczna
 
 1. Utwórz katalog `/config/custom_components/fuelio/`.
 2. Skopiuj do niego zawartość katalogu `custom_components/fuelio` z repozytorium.
-3. Utwórz katalog `/config/fuelio/`.
-4. Rozpakuj archiwum eksportu Fuelio i umieść plik CSV w `/config/fuelio/vehicle-1-sync.csv`.
-5. Zrestartuj Home Assistant.
-6. Otwórz **Ustawienia → Urządzenia i usługi → Dodaj integrację** i wyszukaj **Fuelio**.
-7. Wskaż ścieżkę `/config/fuelio/vehicle-1-sync.csv` i interwał odświeżania (domyślnie 5 minut).
+3. Zrestartuj Home Assistant.
+4. Otwórz **Ustawienia → Urządzenia i usługi → Dodaj integrację** i wyszukaj **Fuelio**.
+5. Wybierz źródło danych:
+   - **Lokalny plik CSV** — domyślna ścieżka `/config/fuelio/vehicle-1-sync.csv`.
+   - **Google Drive (zsynchronizowany plik / SMB)** — domyślna ścieżka `/share/Fuelio/vehicle-1-sync.csv`.
+6. Wskaż ścieżkę i interwał odświeżania (domyślnie 5 minut).
+
+### Google Drive przez rclone i SMB
+
+Integracja czyta wyłącznie rozpakowany plik CSV widoczny w systemie plików Home Assistant. Synchronizację ZIP z Google Drive, rozpakowanie i udostępnienie pliku przez SMB należy skonfigurować niezależnie. Przykładowy przepływ:
+
+`Google Drive → rclone → rozpakowanie CSV → udział SMB → /share/Fuelio/vehicle-1-sync.csv → Fuelio`
+
+Nie wpisuj danych OAuth Google do konfiguracji integracji.
 
 ## Encje
 
@@ -27,7 +38,7 @@ Identyfikatory encji mogą zostać zmienione przez Home Assistant, jeśli istnie
 
 ## Aktualizacja
 
-Integracja ponownie odczytuje CSV w zadanym interwale. Aby wczytać nowe tankowanie, zastąp plik nowym eksportem Fuelio. Nie jest wymagany restart HA.
+Integracja ponownie odczytuje CSV w zadanym interwale. Po zastąpieniu pliku nowym eksportem dane zostaną odczytane przy kolejnym odświeżeniu. Nie jest wymagany restart HA.
 
 ## Obliczenia i ograniczenia
 
@@ -36,7 +47,6 @@ Integracja ponownie odczytuje CSV w zadanym interwale. Aby wczytać nowe tankowa
 - Koszty paliwa są sumowane z kolumny `Price (optional)`.
 - Najbliższe przypomnienie jest wybierane na podstawie `RemindOdo`, jeśli jest większe od aktualnego przebiegu.
 - Przypomnienia kalendarzowe z `RemindDate` nie są obecnie obsługiwane.
-- Automatyczna synchronizacja z Google Drive/Android nie jest częścią tej wersji.
 
 ## Prywatność
 
