@@ -1,10 +1,13 @@
 {
   "domain": "fuelio",
   "name": "Fuelio",
-  "codeowners": ["@pmalio"],
+  "codeowners": [
+    "@pmalio"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/pmalio/fuelio",
   "iot_class": "local_polling",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "issue_tracker": "https://github.com/pmalio/fuelio/issues"
 }
