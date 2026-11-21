@@ -1,0 +1,17 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Fuelio",
+        "description": "Select the path to the Fuelio CSV export and the refresh interval.",
+        "data": {
+          "file_path": "CSV file path",
+          "scan_interval": "Refresh interval (minutes)"
+        }
+      }
+    },
+    "error": {
+      "cannot_read_file": "The file could not be read or is not a valid Fuelio CSV export."
+    }
+  }
+}

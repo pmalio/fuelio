@@ -1,0 +1,17 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Fuelio",
+        "description": "Wskaż ścieżkę do eksportu CSV Fuelio i częstotliwość odświeżania.",
+        "data": {
+          "file_path": "Ścieżka do pliku CSV",
+          "scan_interval": "Częstotliwość odświeżania (minuty)"
+        }
+      }
+    },
+    "error": {
+      "cannot_read_file": "Nie można odczytać pliku lub nie jest to poprawny eksport CSV Fuelio."
+    }
+  }
+}
