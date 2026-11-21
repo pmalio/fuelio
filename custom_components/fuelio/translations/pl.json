@@ -2,12 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Fuelio",
-        "description": "Wskaż ścieżkę do eksportu CSV Fuelio i częstotliwość odświeżania.",
+        "title": "Źródło danych Fuelio",
+        "description": "Wybierz miejsce przechowywania pliku CSV i częstotliwość sprawdzania. Google Drive jest obsługiwany przez zewnętrzną synchronizację pliku — integracja nie łączy się bezpośrednio z Google Drive.",
         "data": {
-          "file_path": "Ścieżka do pliku CSV",
+          "source": "Źródło pliku CSV",
           "scan_interval": "Częstotliwość odświeżania (minuty)"
         }
+      },
+      "file": {
+        "title": "Lokalizacja pliku CSV",
+        "description": "Podaj pełną ścieżkę do pliku CSV. Dla Google Drive zsynchronizuj archiwum ZIP z Home Assistant (np. przez rclone i udział sieciowy SMB), a następnie wskaż rozpakowany plik CSV.",
+        "data": {
+          "file_path": "Ścieżka do pliku CSV"
+        }
+      }
+    },
+    "options": {
+      "source": {
+        "local": "Lokalny plik CSV",
+        "google_drive": "Google Drive (zsynchronizowany plik / SMB)"
       }
     },
     "error": {

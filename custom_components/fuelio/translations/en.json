@@ -2,12 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Fuelio",
-        "description": "Select the path to the Fuelio CSV export and the refresh interval.",
+        "title": "Fuelio data source",
+        "description": "Choose where the CSV export is stored and how often it should be checked. Google Drive is accessed through an externally synchronized file; this integration does not connect to Google Drive directly.",
         "data": {
-          "file_path": "CSV file path",
+          "source": "CSV source",
           "scan_interval": "Refresh interval (minutes)"
         }
+      },
+      "file": {
+        "title": "CSV file location",
+        "description": "Enter the full path to the CSV file. For Google Drive, synchronize the ZIP export to Home Assistant (for example with rclone and an SMB network share), then point to the extracted CSV.",
+        "data": {
+          "file_path": "CSV file path"
+        }
+      }
+    },
+    "options": {
+      "source": {
+        "local": "Local CSV file",
+        "google_drive": "Google Drive (synced file / SMB)"
       }
     },
     "error": {
