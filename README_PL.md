@@ -1,8 +1,8 @@
 # Fuelio dla Home Assistant
 
-Niestandardowa integracja odczytująca eksport CSV aplikacji Fuelio. Obsługuje dwa warianty źródła:
+Custom integration odczytująca eksport CSV aplikacji Fuelio. Obsługuje dwa warianty źródła:
 - **Lokalny plik CSV** — np. w katalogu `/config/fuelio/`.
-- **Google Drive** — przez zewnętrzną synchronizację pliku do Home Assistant, np. rclone na osobnym LXC i udział SMB. Integracja nie łączy się bezpośrednio z Google Drive ani nie przechowuje tokenów Google.
+- **Google Drive** — przez zewnętrzną synchronizację pliku do Home Assistant, np. rclone i SMB. Integracja nie łączy się bezpośrednio z Google Drive ani nie przechowuje tokenów Google.
 
 ## Instalacja ręczna
 
@@ -34,21 +34,32 @@ Integracja tworzy sensory dotyczące:
 - kosztu i ilości paliwa w bieżącym miesiącu oraz roku,
 - łącznych kosztów eksploatacyjnych,
 - najbliższego przypomnienia według przebiegu,
-- liczby wpisów tankowań i kosztów.
+- najbliższego przypomnienia kalendarzowego (data i nazwa),
+- ostatniego wydatku: nazwa, kwota, data i kategoria,
+- liczby tankowań i wpisów kosztowych.
+
+Sensor **Liczba wpisów kosztowych** udostępnia pełną historię wpisów w atrybucie `cost_history`. Każdy wpis zawiera nazwę, datę, kategorię, koszt, przebieg oraz ustawione przypomnienia.
+
+## Przypomnienia i koszty
+
+- Przypomnienia przebiegowe są wybierane na podstawie `RemindOdo`, jeśli wartość jest większa od aktualnego przebiegu.
+- Przypomnienia kalendarzowe są wybierane na podstawie przyszłej daty `RemindDate`, niezależnie od `RemindOdo`. Wpis z `RemindOdo=0` nadal może więc wywołać przypomnienie kalendarzowe.
+- Ostatni wydatek jest wybierany według daty wpisu w sekcji `## Costs`.
+- Wpisy z kosztem 0 pozostają widoczne w historii i mogą być przypomnieniami, ale nie zwiększają sum kosztów eksploatacyjnych.
 
 Identyfikatory encji mogą zostać zmienione przez Home Assistant, jeśli istnieją już encje o podobnych nazwach.
 
 ## Aktualizacja
 
-Integracja ponownie odczytuje CSV w zadanym interwale. Po zastąpieniu pliku nowym eksportem dane zostaną odczytane przy kolejnym odświeżeniu. Nie jest wymagany restart HA.
+Integracja ponownie odczytuje CSV w zadanym interwale. Po zastąpieniu pliku nowym eksportem dane zostaną odczytane przy kolejnym odświeżeniu. Nie jest wymagany restart HA po podmianie samego pliku. Po aktualizacji kodu integracji należy zrestartować Home Assistant.
 
 ## Obliczenia i ograniczenia
 
 - Średnie spalanie to średnia arytmetyczna dodatnich wartości z kolumny `l/100km (optional)`.
 - Wartość 0.0 w polu spalania jest traktowana jako brak wyliczenia.
 - Koszty paliwa są sumowane z kolumny `Price (optional)`.
-- Najbliższe przypomnienie jest wybierane na podstawie `RemindOdo`, jeśli jest większe od aktualnego przebiegu.
-- Przypomnienia kalendarzowe z `RemindDate` nie są obecnie obsługiwane.
+- Koszty eksploatacyjne sumują wyłącznie dodatnie wartości z kolumny `Cost`; wpisy zerowe są zachowane w historii.
+- Przypomnienia kalendarzowe i przebiegowe są prezentowane oddzielnie.
 
 ## Prywatność
 
