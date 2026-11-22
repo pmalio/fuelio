@@ -25,6 +25,12 @@ SENSORS = [
     ("maintenance_cost_year", "Koszty eksploatacji w tym roku", "PLN", "measurement", None),
     ("next_service_distance", "Pozostało do najbliższego przypomnienia", "km", "measurement", None),
     ("next_service_name", "Najbliższe przypomnienie serwisowe", None, None, None),
+    ("next_service_date_name", "Najbliższe przypomnienie – data", None, None, None),
+    ("next_service_date", "Data najbliższego przypomnienia", None, None, "timestamp"),
+    ("latest_cost_name", "Ostatni wydatek – nazwa", None, None, None),
+    ("latest_cost_amount", "Ostatni wydatek – kwota", "PLN", "measurement", None),
+    ("latest_cost_date", "Data ostatniego wydatku", None, None, "timestamp"),
+    ("latest_cost_category", "Ostatni wydatek – kategoria", None, None, None),
     ("refuel_count", "Liczba tankowań", None, "total", None),
     ("cost_count", "Liczba wpisów kosztowych", None, "total", None),
 ]
@@ -46,6 +52,12 @@ ICONS = {
     "maintenance_cost_year": "mdi:wrench",
     "next_service_distance": "mdi:car-wrench",
     "next_service_name": "mdi:clipboard-check",
+    "next_service_date_name": "mdi:calendar-alert",
+    "next_service_date": "mdi:calendar-clock",
+    "latest_cost_name": "mdi:receipt-text",
+    "latest_cost_amount": "mdi:cash",
+    "latest_cost_date": "mdi:calendar",
+    "latest_cost_category": "mdi:tag",
     "refuel_count": "mdi:counter",
     "cost_count": "mdi:receipt-text",
 }
@@ -87,6 +99,8 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data
         latest = data["latest"]
         reminder = data.get("next_reminder")
+        date_reminder = data.get("next_date_reminder")
+        latest_cost = data.get("latest_cost")
         values = {
             "odometer": data.get("odometer"),
             "last_refuel_liters": latest.get("fuel_liters"),
@@ -104,6 +118,18 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
             "maintenance_cost_year": data.get("maintenance_cost_year"),
             "next_service_distance": max(0, reminder["remind_odometer"] - data["odometer"]) if reminder else None,
             "next_service_name": reminder["title"] if reminder else None,
+            "next_service_date_name": date_reminder["title"] if date_reminder else None,
+            "next_service_date": (
+                date_reminder["remind_date"].replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+                if date_reminder else None
+            ),
+            "latest_cost_name": latest_cost["title"] if latest_cost else None,
+            "latest_cost_amount": latest_cost["cost"] if latest_cost else None,
+            "latest_cost_date": (
+                latest_cost["date"].replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+                if latest_cost else None
+            ),
+            "latest_cost_category": latest_cost["category"] if latest_cost else None,
             "refuel_count": data.get("refuel_count"),
             "cost_count": data.get("cost_count"),
         }
@@ -113,6 +139,7 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
             "last_calculated_consumption", "average_consumption", "fuel_cost_month",
             "fuel_cost_year", "fuel_liters_month", "fuel_liters_year",
             "maintenance_cost_total", "maintenance_cost_year", "next_service_distance",
+            "latest_cost_amount",
         }
         if self.key in numeric_keys and value is not None:
             return round(value, 2)
@@ -122,7 +149,9 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
     def extra_state_attributes(self):
         data = self.coordinator.data
         latest = data["latest"]
-        return {
+        date_reminder = data.get("next_date_reminder")
+        mileage_reminder = data.get("next_reminder")
+        attributes = {
             "vehicle": data.get("vehicle_name"),
             "make": data.get("make"),
             "model": data.get("model"),
@@ -137,7 +166,23 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
             "records_costs": data.get("cost_count"),
             "csv_last_modified": data.get("last_updated").isoformat() if data.get("last_updated") else None,
             "next_service_due_at_odometer": (
-                data.get("next_reminder", {}).get("remind_odometer")
-                if data.get("next_reminder") else None
+                mileage_reminder.get("remind_odometer") if mileage_reminder else None
+            ),
+            "next_service_due_at_date": (
+                date_reminder.get("remind_date").isoformat() if date_reminder else None
             ),
         }
+        if self.key == "cost_count":
+            attributes["cost_history"] = [
+                {
+                    "title": item["title"],
+                    "date": item["date"].isoformat(),
+                    "category": item["category"],
+                    "cost": item["cost"],
+                    "odometer": item["odometer"],
+                    "remind_date": item["remind_date"].isoformat() if item["remind_date"] else None,
+                    "remind_odometer": item["remind_odometer"] or None,
+                }
+                for item in data.get("costs", [])
+            ]
+        return attributes

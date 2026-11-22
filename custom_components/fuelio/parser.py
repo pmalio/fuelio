@@ -110,6 +110,7 @@ def parse_fuelio_csv(path: str) -> dict[str, Any]:
             "repeat_odometer": _to_float(row.get("RepeatOdo")),
             "repeat_months": _to_int(row.get("RepeatMonths")),
         })
+    costs.sort(key=lambda item: item["date"], reverse=True)
 
     now = datetime.now()
     current_month = [x for x in logs if x["date"].year == now.year and x["date"].month == now.month]
@@ -118,15 +119,25 @@ def parse_fuelio_csv(path: str) -> dict[str, Any]:
     valid_costs = [x for x in costs if x["cost"] > 0]
 
     latest = logs[0]
+    latest_cost = costs[0] if costs else None
     latest_calculated_consumption = next(
         (x["consumption"] for x in logs if x["consumption"] > 0), None
     )
     current_odometer = latest["odometer"]
-    reminders = [
+
+    # Mileage and calendar reminders are independent: a date reminder is valid
+    # even when Fuelio exports RemindOdo as 0.
+    mileage_reminders = [
         x for x in costs
         if x["remind_odometer"] > current_odometer and x["title"]
     ]
-    reminders.sort(key=lambda x: x["remind_odometer"])
+    mileage_reminders.sort(key=lambda x: x["remind_odometer"])
+
+    date_reminders = [
+        x for x in costs
+        if x["remind_date"] is not None and x["remind_date"] > now and x["title"]
+    ]
+    date_reminders.sort(key=lambda x: x["remind_date"])
 
     return {
         "vehicle_name": vehicle.get("Name", "Fuelio"),
@@ -137,6 +148,7 @@ def parse_fuelio_csv(path: str) -> dict[str, Any]:
         "logs": logs,
         "costs": costs,
         "latest": latest,
+        "latest_cost": latest_cost,
         "latest_calculated_consumption": latest_calculated_consumption,
         "average_consumption": (sum(valid_consumption) / len(valid_consumption)) if valid_consumption else None,
         "fuel_cost_month": sum(x["cost"] for x in current_month),
@@ -145,7 +157,8 @@ def parse_fuelio_csv(path: str) -> dict[str, Any]:
         "fuel_liters_year": sum(x["fuel_liters"] for x in current_year),
         "maintenance_cost_total": sum(x["cost"] for x in valid_costs),
         "maintenance_cost_year": sum(x["cost"] for x in valid_costs if x["date"].year == now.year),
-        "next_reminder": reminders[0] if reminders else None,
+        "next_reminder": mileage_reminders[0] if mileage_reminders else None,
+        "next_date_reminder": date_reminders[0] if date_reminders else None,
         "refuel_count": len(logs),
         "cost_count": len(costs),
         "last_updated": datetime.fromtimestamp(Path(path).stat().st_mtime),
