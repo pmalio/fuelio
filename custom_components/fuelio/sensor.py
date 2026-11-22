@@ -29,6 +29,27 @@ SENSORS = [
     ("cost_count", "Liczba wpisów kosztowych", None, "total", None),
 ]
 
+ICONS = {
+    "odometer": "mdi:counter",
+    "last_refuel_liters": "mdi:gas-station",
+    "last_refuel_cost": "mdi:cash",
+    "last_refuel_price": "mdi:tag",
+    "last_refuel_date": "mdi:calendar-clock",
+    "last_refuel_station": "mdi:map-marker",
+    "last_calculated_consumption": "mdi:chart-line",
+    "average_consumption": "mdi:chart-bar",
+    "fuel_cost_month": "mdi:calendar-month",
+    "fuel_cost_year": "mdi:calendar",
+    "fuel_liters_month": "mdi:gas-station",
+    "fuel_liters_year": "mdi:gas-station",
+    "maintenance_cost_total": "mdi:tools",
+    "maintenance_cost_year": "mdi:wrench",
+    "next_service_distance": "mdi:car-wrench",
+    "next_service_name": "mdi:clipboard-check",
+    "refuel_count": "mdi:counter",
+    "cost_count": "mdi:receipt-text",
+}
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -46,6 +67,7 @@ class FuelioSensor(CoordinatorEntity, SensorEntity):
         self.key = key
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_icon = ICONS.get(key, "mdi:eye")
         self._attr_native_unit_of_measurement = unit
         if state_class:
             self._attr_state_class = getattr(SensorStateClass, state_class.upper())
