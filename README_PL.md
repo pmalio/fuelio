@@ -35,7 +35,7 @@ Integracja tworzy sensory dotyczące:
 - łącznych kosztów eksploatacyjnych,
 - najbliższego przypomnienia według przebiegu,
 - najbliższego przypomnienia kalendarzowego (data i nazwa),
-- ostatniego wydatku: nazwa, kwota, data i kategoria,
+- ostatniego wpisu kosztowego: nazwa, kwota, data i kategoria,
 - liczby tankowań i wpisów kosztowych.
 
 Sensor **Liczba wpisów kosztowych** udostępnia pełną historię wpisów w atrybucie `cost_history`. Każdy wpis zawiera nazwę, datę, kategorię, koszt, przebieg oraz ustawione przypomnienia.
@@ -44,7 +44,7 @@ Sensor **Liczba wpisów kosztowych** udostępnia pełną historię wpisów w atr
 
 - Przypomnienia przebiegowe są wybierane na podstawie `RemindOdo`, jeśli wartość jest większa od aktualnego przebiegu.
 - Przypomnienia kalendarzowe są wybierane na podstawie przyszłej daty `RemindDate`, niezależnie od `RemindOdo`. Wpis z `RemindOdo=0` nadal może więc wywołać przypomnienie kalendarzowe.
-- Ostatni wydatek jest wybierany według daty wpisu w sekcji `## Costs`.
+- Ostatni wpis kosztowy jest wybierany według daty wpisu w sekcji `## Costs`.
 - Wpisy z kosztem 0 pozostają widoczne w historii i mogą być przypomnieniami, ale nie zwiększają sum kosztów eksploatacyjnych.
 
 Identyfikatory encji mogą zostać zmienione przez Home Assistant, jeśli istnieją już encje o podobnych nazwach.
